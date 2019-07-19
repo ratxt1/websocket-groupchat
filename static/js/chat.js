@@ -61,7 +61,31 @@ ws.onclose = function (evt) {
 $('form').submit(function (evt) {
   evt.preventDefault();
 
-  let data = {type: "chat", text: $("#m").val()};
+  let input = $("#m").val();
+
+  let data;
+  if (input === '/joke') {
+    data = {type: 'joke'};
+  } else if (input === '/members') {
+    data = {type: 'members'};
+  } 
+  else if (input.startsWith("/name")) {
+    let x = input.split(' ');
+    data = {
+      type: "newname",
+      newName: x[1]
+    }
+  }
+  else if (input.startsWith('/pm')) {
+    let x = input.split(' ');
+    data = {
+      type: 'pm',
+      to: x[1],
+      text: x.slice(2).join(" ")
+    };
+  } else {
+    data = {type: "chat", text: $("#m").val()};
+  }
   ws.send(JSON.stringify(data));
 
   $('#m').val('');

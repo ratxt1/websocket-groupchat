@@ -47,6 +47,29 @@ class ChatUser {
     });
   }
 
+  handlePrivateChat(toUser, text) {
+    this.room.sendPrivate({
+      to: toUser,
+      name: this.name,
+      type: 'chat',
+      text: text
+    });
+  }
+
+  handleNameChange(newName) {
+    let oldName = this.name;
+    for (let member of this.room.members) {
+      if (member.name === oldName) {
+        member.name = newName;
+      }
+    }
+    this.room.broadcast({
+      type: 'note',
+      text: `"${oldName}" updated name to "${newName}".`
+    });
+
+  }
+
   /** Handle messages from client:
    *
    * - {type: "join", name: username} : join
@@ -55,12 +78,33 @@ class ChatUser {
 
   handleMessage(jsonData) {
     let msg = JSON.parse(jsonData);
-
     if (msg.type === 'join') this.handleJoin(msg.name);
+    else if (msg.type === 'joke') this.handleJoke();
     else if (msg.type === 'chat') this.handleChat(msg.text);
+    else if (msg.type === 'members') this.handleGetMembers();
+    else if (msg.type === 'pm') this.handlePrivateChat(msg.to, msg.text);
+    else if (msg.type === 'newname') this.handleNameChange(msg.newName);
     else throw new Error(`bad message: ${msg.type}`);
   }
 
+  handleGetMembers(){
+    let memberNames = [...this.room.members].map(u => u.name);
+    
+    let data = {
+      type: 'note',
+      text:  "In room: " + memberNames.join(", ")
+    }
+    this.send(JSON.stringify(data));
+  }
+
+  handleJoke() {
+   let randomIndex = Math.floor(Math.random() * this.room.jokes.length)
+   let data = {
+    type: 'note',
+    text: this.room.jokes[randomIndex]
+   }
+   this.send(JSON.stringify(data));
+  }
   /** Connection was closed: leave room, announce exit to others */
 
   handleClose() {

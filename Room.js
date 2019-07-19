@@ -30,6 +30,14 @@ class Room {
   constructor(roomName) {
     this.name = roomName;
     this.members = new Set();
+    this.jokes = [
+      'Q: Why did the chicken cross the road? A: to get to the other side',
+      "Two muffins are in an oven one muffin says to the other 'boy it's hot in here' the other says 'OMG A TALKING MUFFIN!'",
+      "Q: What's the object oriented way of becoming wealthy? A: Inheritance!",
+      "Q: Where does a two ton gorilla sleep? A: anywhere he wants!",
+      "I get no respect! This girl told me to come over nobody's home. I went over, there was nobody home!",
+      "Q: How do you comfort a JavaScript bug? A: You console it!"
+    ]
   }
 
   /** member joining a room. */
@@ -49,6 +57,14 @@ class Room {
   broadcast(data) {
     for (let member of this.members) {
       member.send(JSON.stringify(data));
+    }
+  }
+  sendPrivate(data) {
+    console.log(data)
+    for (let member of this.members) {
+      if (member.name === data.to || member.name === data.name) {
+        member.send(JSON.stringify(data));
+      }
     }
   }
 }
